@@ -2,20 +2,13 @@ services:
   goboxd:
     build:
       context: .
-      target: runtime
+      dockerfile: Dockerfile
     image: goboxd:dev
-    container_name: goboxd
     ports:
       - "8080:8080"
-    privileged: true
-
-  tools:
-    build:
-      context: .
-      target: builder
-    image: goboxd-tools:dev
-    volumes:
-      - .:/src
-    working_dir: /src
-    profiles: ["tools"]
-    entrypoint: []
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
