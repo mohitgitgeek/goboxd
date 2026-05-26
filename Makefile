@@ -14,7 +14,8 @@ test: build
 	docker run --rm --entrypoint /bin/bash $(IMAGE) -c "go test ./..."
 
 integration: build
-	docker run --rm --entrypoint /bin/bash $(IMAGE) -c "go test -tags=integration ./integration/... && ./tests/e2e/run_python.sh"
+	docker run --rm --entrypoint /bin/bash $(IMAGE) -c "go test -tags=integration ./integration/..."
+	docker run --rm --entrypoint /bin/bash $(IMAGE) -c "./tests/e2e/run_python.sh"
 
 lint: build
 	docker run --rm --entrypoint /bin/bash $(IMAGE) -c "golangci-lint run ./... && staticcheck ./..."

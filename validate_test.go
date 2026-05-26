@@ -12,6 +12,8 @@ want     bool
 {name: "invalid absolute path", filename: "/etc/passwd", want: false},
 {name: "invalid parent traversal", filename: "../main.go", want: false},
 {name: "hidden file", filename: ".env", want: false},
+{name: "double dot hidden file", filename: "..env", want: false},
+{name: "hidden file in subdirectory", filename: "dir/.hidden", want: false},
 }
 
 for _, tt := range tests {
