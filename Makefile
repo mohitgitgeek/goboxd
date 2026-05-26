@@ -1,19 +1,30 @@
-.PHONY: build run test integration lint
+IMAGE ?= goboxd:dev
+CONTAINER_NAME ?= goboxd
+ARCHIVE ?= goboxd-image.tar
 
-COMPOSE ?= docker compose
-TOOLS   := $(COMPOSE) --profile tools run --rm tools
+.PHONY: build run test integration load lint save fmt
 
 build:
-	$(COMPOSE) build goboxd
+	docker build -t $(IMAGE) -f Dockerfile .
 
 run:
-	$(COMPOSE) up goboxd
+	docker compose up --build $(CONTAINER_NAME)
 
-test:
-	$(TOOLS) go test ./...
+test: build
+	docker run --rm --entrypoint /bin/bash $(IMAGE) -c "go test ./..."
 
-integration:
-	$(TOOLS) go test -tags=integration ./tests/...
+integration: build
+	docker run --rm --entrypoint /bin/bash $(IMAGE) -c "go test -tags=integration ./integration/..."
+	docker run --rm --entrypoint /bin/bash $(IMAGE) -c "./tests/e2e/run_python.sh"
 
-lint:
-	$(TOOLS) golangci-lint run ./...
+lint: build
+	docker run --rm --entrypoint /bin/bash $(IMAGE) -c "golangci-lint run ./... && staticcheck ./..."
+
+fmt: build
+	docker run --rm --entrypoint /bin/bash $(IMAGE) -c "go fmt ./..."
+
+save: build
+	docker save -o $(ARCHIVE) $(IMAGE)
+
+load:
+	docker load -i $(ARCHIVE)
